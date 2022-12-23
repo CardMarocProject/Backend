@@ -2,6 +2,7 @@ package com.jobcard.applicatoion.Entity;
 
 import java.sql.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,10 +10,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
+import javax.persistence.JoinTable;
 
-import javax.persistence.Table;
+import javax.persistence.OneToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +22,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user")
 public class User {
 
     @Id
@@ -38,8 +37,7 @@ public class User {
     private Date birthdayDate;
     private Card type;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
-    @JoinColumn(name = "image_id")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "UserImage", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "image_id", referencedColumnName = "id"))
     private Image image;
 }

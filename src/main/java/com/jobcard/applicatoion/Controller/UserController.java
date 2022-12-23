@@ -1,6 +1,7 @@
 package com.jobcard.applicatoion.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -21,6 +22,7 @@ import com.jobcard.applicatoion.mappers.UserMapper;
 import com.jobcard.applicatoion.util.ImageUtility;
 
 import java.io.IOException;
+import java.util.Optional;
 
 // @CrossOrigin(origins = "http://localhost:8082") open for specific port
 @CrossOrigin() // open for all ports
@@ -51,10 +53,31 @@ public class UserController {
             return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(rquser);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return null;
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     }
+
+    @GetMapping("{cin}")
+    public ResponseEntity<User> getUserByCin(@PathVariable("cin") String cin) {
+        try {
+            // check if User exist in database
+            User user = getUser(cin);
+            if (user != null) {
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Method to upload the user image
+     *
+     * @param file -> user image
+     * @return image
+     */
 
     public Image uploadImage(MultipartFile file) throws IOException {
         Image image = imageService.uploadeImage(Image.builder()
@@ -64,11 +87,33 @@ public class UserController {
         return image;
     }
 
+    /**
+     * Method to generate the user Qr code
+     *
+     * @param user
+     * @return User Qr Code
+     */
+
     public byte[] generateUserQr(User user) throws WriterException, IOException {
         UserQr UserQr = UserMapper.userToUserQR(user);
 
         byte[] qrCode = qrCodeService.getQRCodeImage(UserQr.toString(), WIDTH, HEIGHT);
         return qrCode;
+    }
+
+    /**
+     * Method to get the user by cin
+     *
+     * @param cin
+     * @return User
+     */
+    private User getUser(String cin) {
+        User userObj = userService.findByCin(cin);
+
+        if (userObj != null) {
+            return userObj;
+        }
+        return null;
     }
 
 }
