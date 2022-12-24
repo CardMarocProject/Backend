@@ -22,7 +22,7 @@ import com.jobcard.applicatoion.mappers.UserMapper;
 import com.jobcard.applicatoion.util.ImageUtility;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.Base64;;
 
 // @CrossOrigin(origins = "http://localhost:8082") open for specific port
 @CrossOrigin() // open for all ports
@@ -41,16 +41,18 @@ public class UserController {
     private IQRCodeService qrCodeService;
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<byte[]> createUser(@RequestPart("user") User user, @RequestPart("image") MultipartFile file) {
+    public ResponseEntity<String> createUser(@RequestPart("user") User user, @RequestPart("image") MultipartFile file) {
         try {
-
-            Image imageUser = uploadImage(file);
             System.out.println(user);
+            System.out.println(file);
+            Image imageUser = uploadImage(file);
+
             user.setImage(imageUser);
             userService.createUser(user);
             byte[] rquser = generateUserQr(user);
-
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(rquser);
+            String qrcode = Base64.getEncoder().encodeToString(rquser);
+            System.out.println("mee" + qrcode);
+            return new ResponseEntity<>(qrcode, HttpStatus.OK);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

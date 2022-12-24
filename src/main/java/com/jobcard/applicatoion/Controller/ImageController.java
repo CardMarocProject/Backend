@@ -11,19 +11,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.jobcard.applicatoion.Entity.Image;
 import com.jobcard.applicatoion.Service.IImageService;
 import com.jobcard.applicatoion.util.ImageUtility;
 
+//@CrossOrigin(origins = "http://localhost:4200") // open for specific port
+// @CrossOrigin() // open for all ports
+@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "Requestor-Type", exposedHeaders = "X-Get-Header")
 @RestController
 @RequestMapping("api/v1/image")
 public class ImageController {
-    @Autowired
-    private IImageService imageService;
 
     @Autowired
+    private IImageService imageService;
 
     @GetMapping(path = { "{id}" })
     public ResponseEntity<byte[]> getImage(@PathVariable("id") Long id) throws IOException {
@@ -46,8 +47,8 @@ public class ImageController {
     /**
      * Method to search the image by id
      *
-     * @param cin
-     * @return User
+     * @param id
+     * @return image
      */
     private Optional<Image> isExistImage(Long id) {
         Optional<Image> img = imageService.findById(id);
