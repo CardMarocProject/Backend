@@ -1,4 +1,4 @@
- 
+
 #install maven to run all commands build is just a name 
 FROM maven:3.8.6 AS build
 #directory that i will work in 
@@ -15,6 +15,6 @@ RUN mvn package -DskipTests
 
 FROM openjdk:17-jdk-alpine
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE  8080
+EXPOSE  8092
 CMD  ["java","-jar","app.jar"]
 
