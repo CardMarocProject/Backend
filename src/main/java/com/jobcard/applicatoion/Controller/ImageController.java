@@ -18,7 +18,7 @@ import com.jobcard.applicatoion.util.ImageUtility;
 
 //@CrossOrigin(origins = "http://localhost:4200") // open for specific port
 // @CrossOrigin() // open for all ports
-@CrossOrigin(origins = "http://localhost:4200", allowedHeaders = "Requestor-Type", exposedHeaders = "X-Get-Header")
+@CrossOrigin(origins = "*", allowedHeaders = "Requestor-Type", exposedHeaders = "X-Get-Header")
 @RestController
 @RequestMapping("api/v1/image")
 public class ImageController {

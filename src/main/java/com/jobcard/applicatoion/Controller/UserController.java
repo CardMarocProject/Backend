@@ -25,8 +25,9 @@ import java.io.IOException;
 import java.util.Base64;;
 
 // @CrossOrigin(origins = "http://localhost:8082") open for specific port
-@CrossOrigin() // open for all ports
+//@CrossOrigin() // open for all ports
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "Requestor-Type", exposedHeaders = "X-Get-Header")
 @RequestMapping("api/v1/user")
 public class UserController {
 
