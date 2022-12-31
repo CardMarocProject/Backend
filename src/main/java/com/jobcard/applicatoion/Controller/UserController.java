@@ -22,7 +22,10 @@ import com.jobcard.applicatoion.mappers.UserMapper;
 import com.jobcard.applicatoion.util.ImageUtility;
 
 import java.io.IOException;
-import java.util.Base64;;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;;
 
 // @CrossOrigin(origins = "http://localhost:8082") open for specific port
 //@CrossOrigin() // open for all ports
@@ -42,23 +45,40 @@ public class UserController {
     private IQRCodeService qrCodeService;
 
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<String> createUser(@RequestPart("user") User user, @RequestPart("image") MultipartFile file) {
+    public ResponseEntity<Map<String, Object>> createUser(@RequestPart("user") User user,
+            @RequestPart("image") MultipartFile file) {
         try {
-            System.out.println(user);
-            System.out.println(file);
-            Image imageUser = uploadImage(file);
 
+            // image coding
+            Image imageUser = uploadImage(file);
+            // set the image to the user
             user.setImage(imageUser);
-            userService.createUser(user);
+            // save user and generat the qr code
+            User newUser = userService.createUser(user);
+
             byte[] rquser = generateUserQr(user);
             String qrcode = Base64.getEncoder().encodeToString(rquser);
-            System.out.println("mee" + qrcode);
-            return new ResponseEntity<>(qrcode, HttpStatus.OK);
+            // return the user creted and his qr code
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("data", qrcode);
+            data.put("user", userTouser(newUser));
+            return new ResponseEntity<Map<String, Object>>(data, HttpStatus.OK);
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    private User userTouser(User newUser) {
+        Image dbImage = newUser.getImage();
+        newUser.setImage(Image.builder() 
+        .name(dbImage.getName())
+        .type(dbImage.getType())
+        .image(ImageUtility.decompressImage(dbImage.getImage())).build());
+
+        return newUser;
+        
     }
 
     @GetMapping("{cin}")
@@ -83,11 +103,11 @@ public class UserController {
      */
 
     public Image uploadImage(MultipartFile file) throws IOException {
-        Image image = imageService.uploadeImage(Image.builder()
+        return imageService.uploadeImage(Image.builder()
                 .name(file.getOriginalFilename())
                 .type(file.getContentType())
                 .image(ImageUtility.compressImage(file.getBytes())).build());
-        return image;
+
     }
 
     /**
